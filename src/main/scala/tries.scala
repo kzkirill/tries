@@ -13,14 +13,14 @@ package object tries {
 
 
     def combine(that: TrieNode): TrieNode = {
-      val (same, thatChildren) = that.children.partition {
-        case (key, _) => children.contains(key)
+      val (same, mine) = children.partition {
+        case (key, _) => that.children.contains(key)
       }
+      val thatChildren = that.children filterKeys (k => !same.contains(k))
       val combinedChildren = same.map {
         case (child, node) => child -> node.combine(that.children(child))
       }
-      val mine = children filterKeys (k => !same.contains(k))
-      TrieNode(text, mine ++ combinedChildren ++ thatChildren, isWord)
+      TrieNode(text, thatChildren ++ combinedChildren ++ mine, isWord)
     }
 
     def insert(c: Char, isLast: Boolean): TrieNode = {
@@ -90,7 +90,7 @@ package object tries {
     }
   }
 
-  def loadPar(words: Array[String], from: Long, to: Long): TrieNode = {
+  def loadPar(words: Array[String], from: Int, to: Int): TrieNode = {
     if ((to - from) > 2) {
       val middle = (to - from) / 2
       val firstQuarter = (middle - from) / 2
@@ -99,11 +99,19 @@ package object tries {
         loadPar(words, firstQuarter + 1, middle),
         loadPar(words, middle + 1, thirdQuarter),
         loadPar(words, thirdQuarter + 1, to))
-
+      println(t1)
+      println(t2)
+      println(t3)
+      println(t4)
       val (combined1, combined2) = parallel(t1.combine(t2), t3.combine(t4))
-      combined1.combine(combined2)
+      //      println(combined1)
+      val combined = combined1.combine(combined2)
+      //      println(combined)
+      combined
     } else {
-      populate(new TrieNode(), words.toList)
+      val sublist = words.slice(from, to + 1).toList
+      //      println(sublist)
+      populate(new TrieNode(), sublist)
     }
   }
 
