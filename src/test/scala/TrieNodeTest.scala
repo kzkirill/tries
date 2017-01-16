@@ -15,7 +15,6 @@ class TrieNodeTest extends FunSuite {
 
   test("Creating Trie node") {
     val dict = populate(trieRoot, dictionary)
-    println(dict)
   }
 
   test("Getting predictions") {
@@ -40,7 +39,6 @@ class TrieNodeTest extends FunSuite {
     val ear = populate(trieRoot, List("ear"))
     val east = populate(trieRoot, List("east"))
     val combined = ear.combine(east).combine(beer)
-    println(combined)
     assert(!combined.predict("bee", 3).contains("bee"), "Prediction for bee should not contain bee")
     assert(combined.predict("bee", 3).contains("beer"), "Prediction for bee should contin beear")
     val predictEa = combined.predict("ea", 3)
@@ -74,6 +72,21 @@ class TrieNodeTest extends FunSuite {
     assert(predicteasterResult.contains("easter"), predicteasterResult.toString + " final trie is " + result)
 
   }
+  test("word that is subword of another") {
+    val word1 = List("beer")
+    val wordLonger = List("bee")
+    val combined = populate(new TrieNode(), word1).combine(populate(new TrieNode(), wordLonger))
+    combined.predict("be",2) contains("bee")
+  }
+
+  test("Long list of words"){
+    val words = List("ear", "bear", "beer", "earn", "beard", "east", "bee", "easter", "become", "eager", "boar", "board")
+
+    val result = populate(new TrieNode(),words)
+
+    val predictBe10 = result.predict("be", 10)
+    assert(predictBe10.contains("bee"), "10 predictions for be should contain bee")
+  }
 
   test("load in parallel") {
     val words = Array("ear", "bear", "beer", "earn", "beard", "east", "bee", "easter", "become", "eager", "boar", "board")
@@ -81,19 +94,18 @@ class TrieNodeTest extends FunSuite {
     val result = loadPar(words, 0, words.length - 1)
 
     val predictBe4 = result.predict("be", 4)
-    println("result " + result)
+    assert(predictBe4.length === 4, "4 predictions for be should be of length 4 " + predictBe4)
+    assert(predictBe4.contains("bee"), "4 predictions for be should contain bee")
+    assert(predictBe4.contains("beer"), "4 predictions for be should contain beer")
+    assert(predictBe4.contains("bear"), "4 predictions for be should contain bear")
+    assert(predictBe4.contains("beard"), "4 predictions for be should contain beard")
 
-    /*
-        assert(predictBe4.length === 4, "4 predictions for be should be of length 4 " + predictBe4)
-        assert(predictBe4.contains("bee"),"4 predictions for be should contain bee")
-        assert(predictBe4.contains("beer"),"4 predictions for be should contain beer")
-        assert(predictBe4.contains("bear"),"4 predictions for be should contain bear")
-        assert(predictBe4.contains("beard"),"4 predictions for be should contain beard")
+    val predictBe2 = result.predict("be", 2)
+    assert(predictBe2.length === 2, "2 predictions for be should be of length 2 " + predictBe4)
+    assert(predictBe2.contains("bee"), "2 predictions for be should contain bee")
+    assert(predictBe2.contains("beer"), "2 predictions for be should contain beer")
 
-        val predictBe2 = result.predict("be",2)
-        assert(predictBe2.length === 2, "2 predictions for be should be of length 2 " + predictBe4)
-        assert(predictBe2.contains("bee"),"2 predictions for be should contain bee")
-        assert(predictBe2.contains("bear"),"2 predictions for be should contain bear")
-    */
+    val predictBe10 = result.predict("be", 10)
+    assert(predictBe10.contains("bee"), "10 predictions for be should contain bee")
   }
 }

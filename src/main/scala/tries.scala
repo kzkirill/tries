@@ -20,7 +20,7 @@ package object tries {
       val combinedChildren = same.map {
         case (child, node) => child -> node.combine(that.children(child))
       }
-      TrieNode(text, thatChildren ++ combinedChildren ++ mine, isWord)
+      TrieNode(text, thatChildren ++ combinedChildren ++ mine, isWord || that.isWord)
     }
 
     def insert(c: Char, isLast: Boolean): TrieNode = {
@@ -99,18 +99,11 @@ package object tries {
         loadPar(words, firstQuarter + 1, middle),
         loadPar(words, middle + 1, thirdQuarter),
         loadPar(words, thirdQuarter + 1, to))
-      println(t1)
-      println(t2)
-      println(t3)
-      println(t4)
       val (combined1, combined2) = parallel(t1.combine(t2), t3.combine(t4))
-      //      println(combined1)
       val combined = combined1.combine(combined2)
-      //      println(combined)
       combined
     } else {
       val sublist = words.slice(from, to + 1).toList
-      //      println(sublist)
       populate(new TrieNode(), sublist)
     }
   }
